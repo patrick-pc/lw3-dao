@@ -79,6 +79,25 @@ contract CryptoDevsDAO is Ownable {
         _;
     }
 
+    /// @dev createProposal allows a CryptoDevsNFT holder to create a new proposal in the DAO
+    /// @param _nftTokenId - the tokenID of the NFT to be purchased from FakeNFTMarketplace if this proposal passes
+    /// @return Returns the proposal index for the newly created proposal
+    function createProposal(uint256 _nftTokenId)
+        external
+        nftHolderOnly
+        returns (uint256)
+    {
+        require(nftMarketplace.available(_nftTokenId), "NFT_NOT_FOR_SALE");
+        Proposal storage proposal = proposals[numProposals];
+        proposal.nftTokenId = _nftTokenId;
+        // Set the proposal's voting deadline to be (current time + 5 minutes)
+        proposal.deadline = block.timestamp + 5 minutes;
+
+        numProposals++;
+
+        return numProposals - 1;
+    }
+
     // Create a modifier which only allows a function to be
     // called if the given proposals' deadline HAS been exceeded
     // and if the proposal has not yet been executed
